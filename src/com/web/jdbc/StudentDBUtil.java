@@ -1,7 +1,9 @@
 package com.web.jdbc;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,5 +66,100 @@ public class StudentDBUtil {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public void addStudent(Student newStudent) throws SQLException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			String sql = "INSERT into STUDENT (first_name, last_name, email) " +
+					"values (?, ?, ?)";
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, newStudent.getFirstName());
+			statement.setString(2, newStudent.getLastName());
+			statement.setString(3, newStudent.getEmail());
+			
+			statement.execute();
+			
+		} finally {
+			close(connection, statement, null);
+		}
+		
+	}
+
+	public Student getStudent(String studentId) throws Exception {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
+		int id = Integer.parseInt(studentId);
+		Student student = null;
+		
+		try {
+		connection = dataSource.getConnection();
+		
+		String sql = "SELECT * FROM student WHERE id = ?";
+		statement = connection.prepareStatement(sql);
+		statement.setInt(1, id);
+		resultSet = statement.executeQuery();
+		
+		if (resultSet.next()) {
+			String firstName = resultSet.getString("first_name");
+			String lastName = resultSet.getString("last_name");
+			String email = resultSet.getString("email");
+			
+			student = new Student(id, firstName, lastName, email);
+		} else {
+			throw new Exception("Could not find Student ID: " + studentId);
+		}
+		
+		return student;
+	} finally {
+		close(connection, statement, resultSet);
+		}
+	}
+
+	public void updateStudent(Student student) throws SQLException {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			
+			String sql = "UPDATE student SET first_name = ?, " +
+					"last_name = ?, email = ? WHERE id = ?";
+			statement = connection.prepareStatement(sql);
+			statement.setString(1, student.getFirstName());
+			statement.setString(2, student.getLastName());
+			statement.setString(3, student.getEmail());
+			statement.setInt(4, student.getId());
+			
+			statement.execute();
+			
+		} finally {
+			close(connection, statement, null);
+		}
+	}
+
+	public void deleteStudent(String studentId) throws Exception {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		int id = Integer.parseInt(studentId);
+		
+		try {
+			connection = dataSource.getConnection();
+			
+			String sql = "DELETE FROM student WHERE id = ?";
+			
+			statement = connection.prepareStatement(sql);
+			statement.setInt(1, id);
+			
+			statement.execute();
+			
+		} finally {
+			close(connection, statement, null);
+		}
+		
 	}
 }
