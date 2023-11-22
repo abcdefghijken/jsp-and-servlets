@@ -1,2 +1,2 @@
-# udemy-jsp-and-servlets
-JSP and Servlets (Simple Project) from Udemy
+# JSP and Servlets
+JSP and Servlets (Udemy)
